@@ -22,6 +22,8 @@ const connectToDb = async () => {
 };
 
 export async function handler(event, context) {
+  context.callbackWaitsForEmptyEventLoop = false;
+
   const dbConnection = await connectToDb();
   const dbBoardCollection = dbConnection.collection('board');
   const dbBoardDocs = await dbBoardCollection.find({}).toArray();
