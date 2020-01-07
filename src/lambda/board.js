@@ -1,30 +1,9 @@
-import { MongoClient } from 'mongodb';
-
-const dbUri = `mongodb+srv://${process.env.MONGO_DB_USERNAME}:${process.env.MONGO_DB_PASSWORD}@${process.env.MONGO_DB_CLUSTER}?retryWrites=true&w=majority`;
-
-let dbCachedConnection = null;
-
-const connectToDb = async () => {
-  if (dbCachedConnection) {
-    return dbCachedConnection;
-  }
-
-  const dbClient = new MongoClient(dbUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-
-  await dbClient.connect();
-
-  dbCachedConnection = dbClient.db('workboard');
-
-  return dbCachedConnection;
-};
+import db from './utility/db';
 
 export async function handler(event, context) {
   context.callbackWaitsForEmptyEventLoop = false;
 
-  const dbConnection = await connectToDb();
+  const dbConnection = await db.connect();
   const dbBoardCollection = dbConnection.collection('board');
   const dbBoardDocs = await dbBoardCollection.find({}).toArray();
 
