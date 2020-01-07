@@ -24,5 +24,14 @@ module.exports = {
         jest: true,
       },
     },
+    {
+      files: [
+        '**/lambda/*.js',
+      ],
+      rules: {
+        'import/prefer-default-export': 'off',
+        'no-param-reassign': 'off',
+      },
+    },
   ],
 };

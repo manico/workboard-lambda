@@ -1,4 +1,4 @@
-export async function handler(event, context) {
+export async function handler() {
   return {
     statusCode: 200,
     body: JSON.stringify({
@@ -7,4 +7,4 @@ export async function handler(event, context) {
       nodeEnv: process.env.NODE_ENV,
     }),
   };
-};
+}
