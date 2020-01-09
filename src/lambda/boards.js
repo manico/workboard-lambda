@@ -1,4 +1,5 @@
 import db from './utility/db';
+import response from './utility/response';
 
 export async function handler(event, context) {
   context.callbackWaitsForEmptyEventLoop = false;
@@ -13,7 +14,7 @@ export async function handler(event, context) {
       $regex: query.name,
       $options: 'i',
     };
-  };
+  }
 
   const dbConnection = await db.connect();
   const dbBoardCollection = dbConnection.collection('board');
@@ -26,6 +27,7 @@ export async function handler(event, context) {
 
   return {
     statusCode: 200,
+    headers: response.getCommonHeaders(),
     body: JSON.stringify({
       data: dbBoardDocs,
       pagination: {
