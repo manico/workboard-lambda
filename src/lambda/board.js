@@ -20,11 +20,31 @@ const getBoard = async (event) => {
   };
 };
 
-const updateBoard = async (event, payload) => ({
-  statusCode: 200,
-  headers: response.getCommonHeaders(),
-  body: JSON.stringify(payload),
-});
+const updateBoard = async (event, payload) => {
+  const data = payload.data;
+  const query = event.queryStringParameters;
+  const queryId = query.id || query._id || data.id || data._id;
+
+  const dbConnection = await db.connect();
+  const dbBoardCollection = dbConnection.collection('board');
+
+  const dbBoardDocResult = await dbBoardCollection
+    .update({
+      _id: db.getIdBinary(queryId),
+    }, {
+      $set: {
+        name: data.name,
+      },
+    });
+
+  return {
+    statusCode: 200,
+    headers: response.getCommonHeaders(),
+    body: JSON.stringify({
+      actionResult: dbBoardDocResult,
+    }),
+  }
+};
 
 const executePostAction = {
   update: updateBoard,
