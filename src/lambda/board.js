@@ -28,25 +28,6 @@ const createBoard = async (event, payload) => {
   }
 };
 
-const deleteBoard = async (event) => {
-
-  const dbConnection = await db.connect();
-  const dbBoardCollection = dbConnection.collection('board');
-
-  const dbBoardDocResult = await dbBoardCollection
-    .deleteOne({
-      _id: getIdFromEvent(event),
-    });
-
-  return {
-    statusCode: 200,
-    headers: response.getCommonHeaders(),
-    body: JSON.stringify({
-      actionResult: dbBoardDocResult,
-    }),
-  }
-};
-
 const readBoard = async (event) => {
   const dbConnection = await db.connect();
   const dbBoardCollection = dbConnection.collection('board');
@@ -76,6 +57,25 @@ const updateBoard = async (event, payload) => {
       $set: {
         name: data.name,
       },
+    });
+
+  return {
+    statusCode: 200,
+    headers: response.getCommonHeaders(),
+    body: JSON.stringify({
+      actionResult: dbBoardDocResult,
+    }),
+  }
+};
+
+const deleteBoard = async (event) => {
+
+  const dbConnection = await db.connect();
+  const dbBoardCollection = dbConnection.collection('board');
+
+  const dbBoardDocResult = await dbBoardCollection
+    .deleteOne({
+      _id: getIdFromEvent(event),
     });
 
   return {
