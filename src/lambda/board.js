@@ -1,16 +1,59 @@
 import db from './utility/db';
 import response from './utility/response';
 
-const getBoard = async (event) => {
+const getIdFromEvent = (event) => {
   const query = event.queryStringParameters;
-  const queryId = query.id || query._id;
+  const queryId = query.id || query._id || data.id || data._id;
 
+  return queryId ? db.getIdBinary(queryId) : null;
+};
+
+const createBoard = async (event, payload) => {
+  const data = payload.data;
+
+  const dbConnection = await db.connect();
+  const dbBoardCollection = dbConnection.collection('board');
+
+  const dbBoardDocResult = await dbBoardCollection
+    .insertOne({
+      name: data.name,
+    });
+
+  return {
+    statusCode: 200,
+    headers: response.getCommonHeaders(),
+    body: JSON.stringify({
+      actionResult: dbBoardDocResult,
+    }),
+  }
+};
+
+const deleteBoard = async (event) => {
+
+  const dbConnection = await db.connect();
+  const dbBoardCollection = dbConnection.collection('board');
+
+  const dbBoardDocResult = await dbBoardCollection
+    .deleteOne({
+      _id: getIdFromEvent(event),
+    });
+
+  return {
+    statusCode: 200,
+    headers: response.getCommonHeaders(),
+    body: JSON.stringify({
+      actionResult: dbBoardDocResult,
+    }),
+  }
+};
+
+const readBoard = async (event) => {
   const dbConnection = await db.connect();
   const dbBoardCollection = dbConnection.collection('board');
 
   const dbBoardDoc = await dbBoardCollection
     .findOne({
-      _id: db.getIdBinary(queryId),
+      _id: getIdFromEvent(event),
     });
 
   return {
@@ -22,15 +65,13 @@ const getBoard = async (event) => {
 
 const updateBoard = async (event, payload) => {
   const data = payload.data;
-  const query = event.queryStringParameters;
-  const queryId = query.id || query._id || data.id || data._id;
 
   const dbConnection = await db.connect();
   const dbBoardCollection = dbConnection.collection('board');
 
   const dbBoardDocResult = await dbBoardCollection
-    .update({
-      _id: db.getIdBinary(queryId),
+    .updateOne({
+      _id: getIdFromEvent(event),
     }, {
       $set: {
         name: data.name,
@@ -47,7 +88,9 @@ const updateBoard = async (event, payload) => {
 };
 
 const executePostAction = {
+  create: createBoard,
   update: updateBoard,
+  delete: deleteBoard,
 };
 
 export async function handler(event, context) {
@@ -56,7 +99,7 @@ export async function handler(event, context) {
   const method = event.httpMethod;
 
   if (method === 'GET') {
-    return getBoard(event);
+    return readBoard(event);
   }
 
   const payload = JSON.parse(event.body);
