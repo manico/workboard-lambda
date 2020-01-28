@@ -7,6 +7,9 @@ export default {
   getIdBinary(idHex) {
     return ObjectID.createFromHexString(idHex);
   },
+  generateId() {
+    return ObjectID();
+  },
   async connect() {
     if (this.connection) {
       return this.connection;

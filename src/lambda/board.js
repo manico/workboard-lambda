@@ -28,6 +28,30 @@ const createBoard = async (event, payload) => {
   }
 };
 
+const createBoardColumn = async (event, payload) => {
+  const data = payload.data;
+
+  const dbConnection = await db.connect();
+  const dbBoardCollection = dbConnection.collection('board');
+
+  const dbBoardDocResult = await dbBoardCollection
+    .updateOne({
+      _id: getIdFromEvent(event),
+    }, {
+      $push: {
+        columns: data.column,
+      },
+    });
+
+  return {
+    statusCode: 200,
+    headers: response.getCommonHeaders(),
+    body: JSON.stringify({
+      actionResult: dbBoardDocResult,
+    }),
+  }
+};
+
 const readBoard = async (event) => {
   const dbConnection = await db.connect();
   const dbBoardCollection = dbConnection.collection('board');
@@ -87,10 +111,38 @@ const deleteBoard = async (event) => {
   }
 };
 
+const deleteBoardColumn = async (event, payload) => {
+  const data = payload.data;
+
+  const dbConnection = await db.connect();
+  const dbBoardCollection = dbConnection.collection('board');
+
+  const dbBoardDocResult = await dbBoardCollection
+    .updateOne({
+      _id: getIdFromEvent(event),
+    }, {
+      $pull: {
+        columns: {
+          position: data.column.position,
+        },
+      },
+    });
+
+  return {
+    statusCode: 200,
+    headers: response.getCommonHeaders(),
+    body: JSON.stringify({
+      actionResult: dbBoardDocResult,
+    }),
+  }
+};
+
 const executePostAction = {
   create: createBoard,
+  createColumn: createBoardColumn,
   update: updateBoard,
   delete: deleteBoard,
+  deleteColumn: deleteBoardColumn,
 };
 
 export async function handler(event, context) {
@@ -103,7 +155,7 @@ export async function handler(event, context) {
   }
 
   const payload = JSON.parse(event.body);
-  const payloadActions = ['delete', 'update', 'create'];
+  const payloadActions = Object.keys(executePostAction);
 
   if (payloadActions.indexOf(payload.action) < 0) {
     return {
