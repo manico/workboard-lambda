@@ -93,7 +93,6 @@ const updateBoard = async (event, payload) => {
 };
 
 const deleteBoard = async (event) => {
-
   const dbConnection = await db.connect();
   const dbBoardCollection = dbConnection.collection('board');
 
