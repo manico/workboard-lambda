@@ -123,7 +123,7 @@ const deleteBoardColumn = async (event, payload) => {
     }, {
       $pull: {
         columns: {
-          position: data.column.position,
+          name: data.column.name,
         },
       },
     });
